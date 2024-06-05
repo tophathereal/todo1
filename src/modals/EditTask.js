@@ -1,29 +1,36 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField } from '@mui/material';
+import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
 
-const EditTaskPopup = ({ modal, toggle, updateTask, taskObj }) => {
+const EditTaskPopup = ({ modal, toggle, updateTask, taskObj, availableCategories }) => {
     const [taskName, setTaskName] = useState('');
     const [description, setDescription] = useState('');
+    const [category, setCategory] = useState('');
 
     const handleChange = (e) => {
         const { name, value } = e.target;
         if (name === "taskName") {
             setTaskName(value);
-        } else {
+        } else if (name === "description") {
             setDescription(value);
+        } else if (name === "category") {
+            setCategory(value);
         }
     };
 
     useEffect(() => {
         setTaskName(taskObj.Name);
         setDescription(taskObj.Description);
+        setCategory(taskObj.category || '');
     }, [taskObj]);
 
     const handleUpdate = (e) => {
         e.preventDefault();
-        let tempObj = {};
-        tempObj['Name'] = taskName;
-        tempObj['Description'] = description;
+        let tempObj = {
+            ...taskObj,
+            Name: taskName,
+            Description: description,
+            category: category
+        };
         updateTask(tempObj);
     };
 
@@ -56,6 +63,23 @@ const EditTaskPopup = ({ modal, toggle, updateTask, taskObj }) => {
                             margin="dense"
                         />
                     </div>
+                    <div className="form-group">
+                        <FormControl fullWidth margin="dense">
+                            <InputLabel>Category</InputLabel>
+                            <Select
+                                value={category}
+                                onChange={handleChange}
+                                name="category"
+                            >
+                                <MenuItem value="">
+                                    <em>None</em>
+                                </MenuItem>
+                                {availableCategories.map((cat, index) => (
+                                    <MenuItem key={index} value={cat}>{cat}</MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+                    </div>
                 </DialogContentText>
             </DialogContent>
             <DialogActions>
@@ -67,3 +91,4 @@ const EditTaskPopup = ({ modal, toggle, updateTask, taskObj }) => {
 };
 
 export default EditTaskPopup;
+

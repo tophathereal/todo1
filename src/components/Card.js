@@ -1,31 +1,26 @@
 import React, {useState} from 'react';
 import EditTask from '../modals/EditTask'
 
-const Card = ({taskObj, index, deleteTask, updateListArray}) => {
+const Card = ({taskObj, index, deleteTask, updateListArray, availableCategories}) => {
     const [modal, setModal] = useState(false);
+    const [isCompleted, setIsCompleted] = useState(taskObj.isCompleted || false);
 
-    const colors = [
-        {
-            primaryColor : "#5D93E1",
-            secondaryColor : "#ECF3FC"
-        },
-        {
-            primaryColor : "#F9D288",
-            secondaryColor : "#FEFAF1"
-        },
-        {
-            primaryColor : "#5DC250",
-            secondaryColor : "#F2FAF1"
-        },
-        {
-            primaryColor : "#F48687",
-            secondaryColor : "#FDF1F1"
-        },
-        {
-            primaryColor : "#B964F7",
-            secondaryColor : "#F3F0FD"
-        }
-    ]
+    const categoryColors = {
+        "Work": { primary: "#5D93E1", secondary: "#ECF3FC" },
+        "Personal": { primary: "#F9D288", secondary: "#FEFAF1" },
+        "Health": { primary: "#5DC250", secondary: "#F2FAF1" },
+        "Errands": { primary: "#F48687", secondary: "#FDF1F1" },
+        "Study": { primary: "#B964F7", secondary: "#F3F0FD" }
+    };
+
+    const defaultColor = { primary: "#808080", secondary: "#E0E0E0" };
+
+    const getColorByCategory = (category) => {
+        return categoryColors[category] || defaultColor;
+    }
+
+    const { primary: primaryColor, secondary: secondaryColor } = getColorByCategory(taskObj.category);
+    const completedColor = `${primaryColor}88`; // Add 88 for 53% opacity in hex, making it darker
 
     const toggle = () => {
         setModal(!modal);
@@ -39,21 +34,58 @@ const Card = ({taskObj, index, deleteTask, updateListArray}) => {
         deleteTask(index)
     }
 
+    const handleComplete = (e) => {
+        const completed = e.target.checked;
+        setIsCompleted(completed);
+        taskObj.isCompleted = completed;
+        updateListArray(taskObj, index);
+    }
+
+    const cardColor = isCompleted ? completedColor : primaryColor;
+    const textColor = isCompleted ? "text-white" : "";
+
     return (
-        <div class = "card-wrapper mr-5">
-            <div class = "card-top" style={{"background-color": colors[index%5].primaryColor}}></div>
-            <div class = "task-holder">
-                <span class = "card-header" style={{"background-color": colors[index%5].secondaryColor, "border-radius": "10px"}}>{taskObj.Name}</span>
-                <p className = "mt-3">{taskObj.Description}</p>
+        <div className="card-wrapper mr-5">
+            <div className="card-top" style={{"backgroundColor": cardColor}}></div>
+            <div className="task-holder">
+                <div className="d-flex align-items-center">
+                    <input 
+                        type="checkbox" 
+                        className="mr-2"
+                        checked={isCompleted}
+                        onChange={handleComplete}
+                    />
+                    <span 
+                        className={`card-header ${textColor}`}
+                        style={{
+                            "backgroundColor": secondaryColor, 
+                            "borderRadius": "10px",
+                            "textDecoration": isCompleted ? "line-through" : "none"
+                        }}
+                    >
+                        {taskObj.Name}
+                    </span>
+                </div>
+                <p className={`mt-3 ${textColor}`}>{taskObj.Description}</p>
+                <p className={`category-tag ${textColor}`} style={{"backgroundColor": cardColor, "display": "inline-block", "padding": "2px 8px", "borderRadius": "5px", "fontSize": "0.8rem"}}>
+                    {taskObj.category || "Uncategorized"}
+                </p>
 
                 <div style={{"position": "absolute", "top":"160px", "left":"160px"}}>
-                    <button style={{"color" : colors[index%5].primaryColor, "cursor" : "pointer"}} onClick = {() => setModal(true)}>close</button>
-                    <button style = {{"color" : colors[index%5].primaryColor, "cursor" : "pointer"}} onClick = {handleDelete}>Delete</button>
+                    <button style={{"color" : cardColor, "cursor" : "pointer"}} onClick = {() => setModal(true)}>Edit</button>
+                    <button style = {{"color" : cardColor, "cursor" : "pointer"}} onClick = {handleDelete}>Delete</button>
                 </div>
         </div>
-        <EditTask modal = {modal} toggle = {toggle} updateTask = {updateTask} taskObj = {taskObj}/>
+        <EditTask 
+            modal={modal} 
+            toggle={toggle} 
+            updateTask={updateTask} 
+            taskObj={taskObj}
+            availableCategories={availableCategories}
+        />
         </div>
     );
 };
 
 export default Card;
+

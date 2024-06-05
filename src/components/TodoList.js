@@ -4,14 +4,25 @@ import Card from './Card';
 
 const TodoList = () => {
     const [modal, setModal] = useState(false);
-    const [taskList, setTaskList] = useState([])
-    
+    const [taskList, setTaskList] = useState([]);
+    const [categories, setCategories] = useState([
+        "Work", "Personal", "Health", "Errands", "Study"
+    ]);
+
     useEffect(() => {
         let arr = localStorage.getItem("taskList")
+        let cats = localStorage.getItem("categories")
        
         if(arr){
             let obj = JSON.parse(arr)
             setTaskList(obj)
+        }
+
+        if(cats){
+            let obj = JSON.parse(cats)
+            setCategories(obj)
+        } else {
+            localStorage.setItem("categories", JSON.stringify(categories))
         }
     }, [])
 
@@ -44,7 +55,6 @@ const TodoList = () => {
         setModal(false)
     }
 
-
     return (
         <>
             <div className = "header text-center">
@@ -52,11 +62,26 @@ const TodoList = () => {
                 <button className = "btn btn-primary mt-2" onClick = {() => setModal(true)} >Create Task</button>
             </div>
             <div className = "task-container">
-            {taskList && taskList.map((obj , index) => <Card taskObj = {obj} index = {index} deleteTask = {deleteTask} updateListArray = {updateListArray}/> )}
+            {taskList && taskList.map((obj , index) => (
+                <Card 
+                    key={index}
+                    taskObj={obj} 
+                    index={index} 
+                    deleteTask={deleteTask} 
+                    updateListArray={updateListArray}
+                    availableCategories={categories}
+                />
+            ))}
             </div>
-            <CreateTask toggle = {toggle} modal = {modal} save = {saveTask}/>
+            <CreateTask 
+                toggle={toggle} 
+                modal={modal} 
+                save={saveTask}
+                availableCategories={categories}
+            />
         </>
     );
 };
 
 export default TodoList;
+
